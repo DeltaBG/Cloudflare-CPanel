@@ -1,4 +1,10 @@
-[![Build Status](https://travis-ci.org/cloudflare/Cloudflare-CPanel.svg?branch=master)](https://travis-ci.org/cloudflare/Cloudflare-CPanel)
+## 2022 Update (v7.0.2)
+
+- Pulling the release from cpanelplugins.jump.bg server instead of cloudflare default repo (not supported since 2018).
+- Full Paper Lantern and Jupiter theme support
+- Vendor libraries update
+- Tweaks and bugfixes
+
 ## Cloudflare cPanel Quick Installation Instructions
 
 Using an SSH client such as Terminal or Putty:
@@ -13,9 +19,6 @@ Step 2. Download necessary files and run installation
 
 NOTES:
 - Be sure to replace [YOUR_HOST_API_KEY] and [YOUR_COMPANY_NAME] with the appropriate values
-
-## cPanel X3 Theme Support Deprecated
-We deprecated support for the cPanel X3 theme because the theme itself is deprecated and [scheduled for removal in a future version of cPanel](https://blog.cpanel.com/its-time-to-say-goodbye-to-x3/).  We realize everyone may not be able to deprecate support for the x3 theme immedietely and have made the old v5 version of the plugin available on the `v5` branch.  This deprecated branch will not receive any updates aside from security fixes.
 
 ## Localization
 
