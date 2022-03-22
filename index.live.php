@@ -78,6 +78,6 @@ function RestProxyCallback(opts) {
 <div id="root" class="cloudflare-partners site-wrapper"></div>
 <script src="compiled.js"></script>
 <?php
-$cpanel->footer();
-$cpanel->end();
+    print $cpanel->footer();
+    $cpanel->end();
 ?>

@@ -1,3 +1,3 @@
-rm -f cloudflare_simple.tar.bz2
-tar -jcvf cloudflare_simple.tar.bz2 cloudflare_simple/*
+rm -f cloudflare_plugin.tar.gz
+tar -jcvf cloudflare_plugin.tar.gz cloudflare_plugin/*
 

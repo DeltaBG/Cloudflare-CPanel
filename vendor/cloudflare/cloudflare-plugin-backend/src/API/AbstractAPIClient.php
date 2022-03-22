@@ -143,11 +143,23 @@ abstract class AbstractAPIClient implements APIInterface
      */
     public function logAPICall($apiName, $message, $isError)
     {
+        $sensitiveHeaderKeys = array(
+            'Authorization',
+            'X-Auth-Email',
+            'X-Auth-Key'
+        );
+
         $logLevel = 'error';
         if ($isError === false) {
             $logLevel = 'debug';
         }
         if (!is_string($message)) {
+            foreach ($sensitiveHeaderKeys as $value) {
+                if (!empty($message['headers'][$value])) {
+                    $message['headers'][$value] = 'REDACTED';
+                }
+            }
+
             $message = print_r($message, true);
         }
         $this->logger->$logLevel('['.$apiName.'] '.$message);

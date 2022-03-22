@@ -2,7 +2,7 @@
 
 #
 # CloudFlare cPanel Install Script
-#
+# JUPITER & PAPER_LANTERN
 
 INSTALLER="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 
@@ -98,7 +98,7 @@ echo "Starting CloudFlare CPanel Installation..."
 if [ "$LOCAL_FILE_PATH" = "" ]; then
 
     # Find the proper version to download
-    LATEST_VERSION=$(curl -s https://api.cloudflare.com/host-gw.html -d "act=cpanel_info" -d "host_key=$HOST_KEY" | sed -e 's/[{}]/''/g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep cpanel_latest | cut -d "\"" -f 6)
+    LATEST_VERSION=$(curl -s https://cpanelplugins.jump.bg/cloudflare/version.php)
 
     if [ "$VERBOSE" = true ]; then
         echo "LATEST_VERSION - '$LATEST_VERSION'"
@@ -110,9 +110,9 @@ if [ "$LOCAL_FILE_PATH" = "" ]; then
     else
       echo "Downloading and unpacking latest version v$LATEST_VERSION..."
     fi
-
     # Download and extract
-    DOWNLOAD_URL="https://github.com/cloudflare/CloudFlare-CPanel/archive/v$LATEST_VERSION.tar.gz"
+    DOWNLOAD_URL="https://cpanelplugins.jump.bg/cloudflare/CloudFlare-CPanel-$LATEST_VERSION.tar.gz"
+    echo $DOWNLOAD_URL
 
     if [ "$VERBOSE" = true ]; then
         echo "curl -sL $DOWNLOAD_URL | tar xfz -"
@@ -137,7 +137,7 @@ else
     # We expect the file to be named like so: 'Cloudflare-CPanel-$LATEST_VERSION.tar.gz'
     # for example Cloudflare-CPanel-1.2.3.tar.gz
     FNAME=$(basename "$LOCAL_FILE_PATH");
-    LATEST_VERSION=$(echo -n "$FNAME" | sed 's/^Cloudflare-CPanel-//' | sed 's/.tar.gz//')
+    LATEST_VERSION=$(echo -n "$FNAME" | sed 's/^CloudFlare-CPanel-//' | sed 's/.tar.gz//')
 
     if [ "$VERBOSE" = true ]; then
         echo "LATEST_VERSION - '$LATEST_VERSION'"
@@ -154,44 +154,76 @@ fi
 # Make sure that the tar directory got created correctly. We expect a directory
 # name something like this: Cloudflare-CPanel-$LATEST_VERSION/cloudflare
 
-if [ ! -d "Cloudflare-CPanel-$LATEST_VERSION" ]; then
-    echo "ERROR - Unpack failed, directory not found: 'Cloudflare-CPanel-$LATEST_VERSION'"
+if [ ! -d "CloudFlare-CPanel-$LATEST_VERSION" ]; then
+    echo "ERROR - Unpack failed, directory not found: 'CloudFlare-CPanel-$LATEST_VERSION'"
     exit 1
 fi
 
-SOURCE_DIR="Cloudflare-CPanel-$LATEST_VERSION"
+SOURCE_DIR="CloudFlare-CPanel-$LATEST_VERSION"
 INSTALL_DIR="/usr/local/cpanel"
+PAPER_LANTERN_DIR="/usr/local/cpanel/base/frontend/paper_lantern"
 
 if [ "$VERBOSE" = true ]; then
     echo "Installing from '$SOURCE_DIR' to '$INSTALL_DIR'"
 fi
 
-# Create the cloudflare theme directory if it does not exist, then install files
-install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
+if [ -d "$PAPER_LANTERN_DIR" ]; then
+    # Create the cloudflare theme directory if it does not exist, then install files
+    install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
 
-install $SOURCE_DIR/proxy.live.php $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
-install $SOURCE_DIR/index.live.php $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
-install $SOURCE_DIR/compiled.js $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
-install $SOURCE_DIR/config.json.sample $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
+    install $SOURCE_DIR/proxy.live.php $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
+    install $SOURCE_DIR/index.live.php $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
+    install $SOURCE_DIR/compiled.js $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
+    install $SOURCE_DIR/config.json.sample $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
+    install $SOURCE_DIR/installers/cloudflare_plugin.tar.gz $INSTALL_DIR/base/frontend/paper_lantern/cloudflare_plugin.tar.gz
+
+    # composer.json is used by cloudflare.update.sh to determine the current version number
+    install $SOURCE_DIR/composer.json $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
+
+    # Install internationalization directory
+    install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/lang
+    install $SOURCE_DIR/lang/* $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/lang
+
+    # Install assets directory
+    install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/assets
+    install $SOURCE_DIR/assets/* $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/assets
+
+    # Install fonts directory
+    install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/fonts
+    install $SOURCE_DIR/fonts/* $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/fonts
+
+    # Install stylesheets directory
+    install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/stylesheets
+    install $SOURCE_DIR/stylesheets/* $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/stylesheets
+fi
+
+# Create the cloudflare theme directory if it does not exist, then install files
+install -d $INSTALL_DIR/base/frontend/jupiter/cloudflare
+
+install $SOURCE_DIR/proxy.live.php $INSTALL_DIR/base/frontend/jupiter/cloudflare
+install $SOURCE_DIR/index.live.php $INSTALL_DIR/base/frontend/jupiter/cloudflare
+install $SOURCE_DIR/compiled.js $INSTALL_DIR/base/frontend/jupiter/cloudflare
+install $SOURCE_DIR/config.json.sample $INSTALL_DIR/base/frontend/jupiter/cloudflare
+install $SOURCE_DIR/installers/cloudflare_plugin.tar.gz $INSTALL_DIR/base/frontend/jupiter/cloudflare_plugin.tar.gz
 
 # composer.json is used by cloudflare.update.sh to determine the current version number
-install $SOURCE_DIR/composer.json $INSTALL_DIR/base/frontend/paper_lantern/cloudflare
+install $SOURCE_DIR/composer.json $INSTALL_DIR/base/frontend/jupiter/cloudflare
 
 # Install internationalization directory
-install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/lang
-install $SOURCE_DIR/lang/* $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/lang
+install -d $INSTALL_DIR/base/frontend/jupiter/cloudflare/lang
+install $SOURCE_DIR/lang/* $INSTALL_DIR/base/frontend/jupiter/cloudflare/lang
 
 # Install assets directory
-install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/assets
-install $SOURCE_DIR/assets/* $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/assets
+install -d $INSTALL_DIR/base/frontend/jupiter/cloudflare/assets
+install $SOURCE_DIR/assets/* $INSTALL_DIR/base/frontend/jupiter/cloudflare/assets
 
 # Install fonts directory
-install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/fonts
-install $SOURCE_DIR/fonts/* $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/fonts
+install -d $INSTALL_DIR/base/frontend/jupiter/cloudflare/fonts
+install $SOURCE_DIR/fonts/* $INSTALL_DIR/base/frontend/jupiter/cloudflare/fonts
 
 # Install stylesheets directory
-install -d $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/stylesheets
-install $SOURCE_DIR/stylesheets/* $INSTALL_DIR/base/frontend/paper_lantern/cloudflare/stylesheets
+install -d $INSTALL_DIR/base/frontend/jupiter/cloudflare/stylesheets
+install $SOURCE_DIR/stylesheets/* $INSTALL_DIR/base/frontend/jupiter/cloudflare/stylesheets
 
 # Install the CloudFlare.pm file
 install -d $INSTALL_DIR/Cpanel/API
@@ -218,7 +250,11 @@ install -d $INSTALL_DIR/3rdparty/php/$PHPVERSION/lib/php/cloudflare/src
 /bin/cp -rf $SOURCE_DIR/src/* $INSTALL_DIR/3rdparty/php/$PHPVERSION/lib/php/cloudflare/src
 
 # Register the plugin buttons with Cpanel
-/usr/local/cpanel/scripts/install_plugin $SOURCE_DIR/installers/cloudflare_simple.tar.bz2
+/usr/local/cpanel/scripts/install_plugin $SOURCE_DIR/installers/cloudflare_plugin.tar.gz --theme jupiter
+
+if [ -d "$PAPER_LANTERN_DIR" ]; then
+    /usr/local/cpanel/scripts/install_plugin $SOURCE_DIR/installers/cloudflare_plugin.tar.gz --theme paper_lantern
+fi
 
 # Copy cloudflare_update.sh to where the cron expects it to be
 install $SOURCE_DIR/cloudflare_update.sh $INSTALL_DIR/bin
